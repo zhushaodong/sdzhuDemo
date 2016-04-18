@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>速派得快运</title>
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <script>
+            
+
+            //对应于native代码注册的JS上下文对象
+            var SPD_IOS = {
+                callApp: function(method, params,callbackId){}
+            }
+        
+            var methodMaps = [];
+            var callbackId = 0;
+            //本地方法的入口，传入方法名、参数、回调函数
+            function callApp(method,params,callback){
+                var id = callbackId;
+                methodMaps[id] = callback;
+                SPD_IOS.callApp(method,params,callbackId ++);
+            }
+        
+            //native调用SPD.jsCallback作为回调，把native数据传入js
+            var SPD = {
+                jsCallback : function(callbackId,jsonResult){
+                    var callback = methodMaps[callbackId];
+                    callback(jsonResult);
+                }
+            }
+        
+        
+        
+            function showLoading(){
+                callApp("showLoading",{"message":"3秒后自动关闭"},function(result){
+                    console.log(result);
+                    setTimeout(function(){
+                            hideLoading();
+                        },3000)
+                });
+            }
+        
+            function hideLoading(){
+                callApp("hideLoading");
+            }
+        
+        </script>
+    </head>
+    <body>
+        <p><a href="javascript:void(0)" onclick="showLoading()" style="display:inline-block">调用native的showLoading方法</a></p>
+        <p><a href="http://www.qq.com" style="display:inline-block">下一页</a></p>
+        
+    </body>
+</html>
